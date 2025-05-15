@@ -10,7 +10,7 @@ export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
 
-  const currency=import.meta.VITE_CURRENCY; // ✅ typo fixed: `import.meta.VITE_CURRENCY` instead of `import.meta.VITE_CURRENCY`
+  const currency=import.meta.env.VITE_CURRENCY; // ✅ typo fixed: `import.meta.VITE_CURRENCY` instead of `import.meta.VITE_CURRENCY`
   const navigate = useNavigate();
   const [user, setUser] = useState(null);       // ✅ typo fixed: `userState` → `useState`
   const [isSeller, setIsSeller] = useState(false); // ✅ typo fixed: same as above
