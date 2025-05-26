@@ -75,3 +75,41 @@ export const login=async(req,res)=>{
         
     }
 }
+
+//Check Auth : /api/user/check-auth
+export const isAuth = async (req, res) => {
+    try {
+      const userId = req.user; // get user id from middleware
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+  
+      const user = await User.findById(userId).select('-password');
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+  
+      return res.json({ success: true, user });
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  };
+  
+
+    //lgoOUt User : /api/user/logout
+
+    export const logout=async (req,res)=>{
+        try {
+            res.clearCookie('token',{
+                httpOnly:true,
+                secure:process.env.NODE_ENV==='production',
+                sameSite:process.env.NODE_ENV==='production' ? 'none' : 'strict'
+            })
+            return res.json({success:true,message:'Logged out successfully'});
+        } catch (error) {
+            
+            console.error(error.message);
+            return res.json({success:false,message:error.message});
+            }
+        }
