@@ -5,6 +5,8 @@ import connectDB from './configs/db.js';
 import dotenv from 'dotenv/config'; // loads .env variables
 import userRouter from './routes/userRoute.js';
 import sellerRouter from './routes/sellerRoute.js';
+import connectCloudinary from './configs/cloudinary.js';
+import productRouter from './routes/productRoute.js';
 
 
 
@@ -20,6 +22,7 @@ app.use(cors({ origin: allowedOrigins, credentials: true })); // Enable CORS wit
 
 // Connect to MongoDB (must be done before the server starts)
 await connectDB(); // ✅ move this AFTER defining app and middleware
+await connectCloudinary(); // Connect to Cloudinary
 
 // Basic route
 app.get('/', (req, res) => res.send("API is working"));
@@ -27,6 +30,7 @@ app.get('/', (req, res) => res.send("API is working"));
 // User API routes
 app.use('/api/user', userRouter);
 app.use('/api/seller', sellerRouter);
+app.use('/api/product', productRouter);
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
