@@ -6,9 +6,9 @@ export const sellerLogin = async (req, res) => {
 
     // Check credentials
     if (
-      password === process.env.SELLER &&
+      password === process.env.SELLER_PASSWORD &&
       email === process.env.SELLER_EMAIL
-    ) {
+    ){
       // Create JWT token
       const token = jwt.sign(
         { email },

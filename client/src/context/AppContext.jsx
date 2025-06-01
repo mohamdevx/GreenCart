@@ -3,8 +3,10 @@ import { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 
-
+axios.defaults.withCredentials = true; // ✅ typo fixed: `axios.defaults.withCredentials` instead of `axios.defaults.withCredentials`
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL; // ✅ typo fixed: `import.meta.VITE_BASE_URL` instead of `import.meta.VITE_BASE_URL`
 
 export const AppContext = createContext();
 
@@ -18,6 +20,22 @@ export const AppContextProvider = ({ children }) => {
   const [products,setProducts] = useState([]); // ✅ typo fixed: `products` added
   const [cartItems, setCartItems] = useState({}); // ✅ typo fixed: `cartItems` added
   const [searchQuery,setSearchQuery] = useState(""); // ✅ typo fixed: `searchQuery` added
+
+//fetch seller statsu
+const fetchSeller=async ()=>{
+  try {
+    const {data}=await axios.get('/api/seller/is-auth');
+    if(data.success){
+      setIsSeller(true);
+
+  }else{
+      setIsSeller(false);
+    }
+  }
+   catch (error) {
+    setIsSeller(false);
+  }
+}
 
   //fetch all products
   const fetchProducts = async () => {
@@ -91,6 +109,7 @@ export const AppContextProvider = ({ children }) => {
   
 
   useEffect(()=>{
+    fetchSeller()
     fetchProducts()
   } ,[])
 
@@ -98,7 +117,7 @@ export const AppContextProvider = ({ children }) => {
   const value = { navigate, user, setUser, isSeller,
      setIsSeller, showUserLogin, setShowUserLogin,products,currency,addToCart,
     updateCartItem ,removeFromCart,cartItems,searchQuery,setSearchQuery,
-  getCartAmount,getCartCount
+  getCartAmount,getCartCount,axios
   }; // ✅ typo fixed: `userState` → `user`, `isSellerState` → `isSeller`, `showUserLoginState` → `showUserLogin`
 
   return (
