@@ -22,7 +22,7 @@ await connectDB(); // ✅ move this AFTER defining app and middleware
 await connectCloudinary(); // Connect to Cloudinary
 
 
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = ['http://localhost:5173','https://green-cart-xi-red.vercel.app']
 
 app.post('stripe',express.raw({type: 'application/json'}),stripeWebhook);
 
