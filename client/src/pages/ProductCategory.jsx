@@ -10,12 +10,12 @@ const ProductCategory = () => {
 
   // Match category from URL with one in categories list
   const searchCategory = categories.find(
-    (item) => item.path.toLowerCase() === category?.toLowerCase()
+    (item) => item?.path?.toLowerCase() === category?.toLowerCase()
   )
 
   // Filter products by category
   const filteredProducts = products.filter(
-    (product) => product.category.toLowerCase() === category?.toLowerCase()
+    (product) => product?.category?.toLowerCase() === category?.toLowerCase()
   )
 
   return (

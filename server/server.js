@@ -10,22 +10,27 @@ import productRouter from './routes/productRoute.js';
 import cartRouter from './routes/cartRoute.js';
 import addressRouter from './routes/addressRoute.js';
 import orderRouter from './routes/orderRoute.js';
+import { stripeWebhook } from './controllers/orderController.js';
 
 
 
 const app = express();
 const port = process.env.PORT || 4000;
 
+// Connect to MongoDB (must be done before the server starts)
+await connectDB(); // ✅ move this AFTER defining app and middleware
+await connectCloudinary(); // Connect to Cloudinary
+
+
 const allowedOrigins = ['http://localhost:5173'];
+
+app.post('stripe',express.raw({type: 'application/json'}),stripeWebhook);
 
 // Middleware
 app.use(express.json()); // Parse incoming JSON requests
 app.use(cookieParser()); // Parse cookies from the client
 app.use(cors({ origin: allowedOrigins, credentials: true })); // Enable CORS with cookies
 
-// Connect to MongoDB (must be done before the server starts)
-await connectDB(); // ✅ move this AFTER defining app and middleware
-await connectCloudinary(); // Connect to Cloudinary
 
 // Basic route
 app.get('/', (req, res) => res.send("API is working"));

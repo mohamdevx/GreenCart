@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
-import { assets, dummyAddress } from "../assets/assets";
+import { assets } from "../assets/assets";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const {
@@ -12,12 +13,14 @@ const Cart = () => {
     updateCartItem,
     navigate,
     getCartAmount,
+    axios,
+    user,setCartItems
   } = useAppContext();
 
   const [cartArray, setCartArray] = useState([]);
-  const [addresses, setAddresses] = useState(dummyAddress);
+  const [addresses, setAddresses] = useState([]);
   const [showAddress, setShowAddress] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentOption, setPaymentOption] = useState("COD");
 
   // Build cart items from product list and cart item keys
@@ -32,11 +35,81 @@ const Cart = () => {
     setCartArray(tempArray);
   };
 
+  // ✅ FIXED: Function properly closed
+  const getUserAddress = async () => {
+    try {
+      const { data } = await axios.get('/api/address/get');
+      if (data.success) {
+        setAddresses(data.addresses);
+        if (data.addresses.length > 0) {
+          setSelectedAddress(data.addresses[0]);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const placeOrder = async () => {
+    try {
+      if (!selectedAddress) {
+        return toast.error("Please select an address");
+      }
+  
+      // Place order with COD
+      if (paymentOption === "COD") {
+        const { data } = await axios.post('/api/order/cod', {
+          userId: user._id,
+          items: cartArray.map(item => ({
+            product: item._id, // ✅ fixed typo: 'proudct' ➝ 'product'
+            quantity: item.quantity
+          })),
+          address: selectedAddress._id
+        });
+  
+        if (data.success) {
+          toast.success(data.message);
+          setCartItems({});
+          navigate('/my-orders');
+        } else {
+          toast.error(data.message);
+        }
+    }else{
+      //place order iwth strpe
+      const {data} = await axios.post('/api/order/stripe', {
+        userId: user._id,
+        items: cartArray.map(item => ({
+          product: item._id,
+          quantity: item.quantity
+        })),
+        address: selectedAddress._id
+      });
+      if (data.success) {
+        window.location.replace(data.url);
+      } else {
+        toast.error(data.message);
+      }
+    }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  
+
+
   useEffect(() => {
     if (products.length && cartItems) {
       getCart();
     }
   }, [products, cartItems]);
+
+  useEffect(() => {
+    if (user) {
+      getUserAddress();
+    }
+  }, [user]);
 
   const cartAmount = getCartAmount();
   const tax = +(cartAmount * 0.02).toFixed(2);
@@ -78,7 +151,6 @@ const Cart = () => {
             key={product._id}
             className="grid grid-cols-[2fr_1fr_1fr] items-center text-sm md:text-base font-medium pt-3"
           >
-            {/* Product Info */}
             <div className="flex items-center md:gap-6 gap-3">
               <div
                 onClick={() => {
@@ -94,9 +166,7 @@ const Cart = () => {
               <div>
                 <p className="hidden md:block font-semibold">{product.name}</p>
                 <div className="font-normal text-gray-500/70">
-                  <p>
-                    Weight: <span>{product.weight || "N/A"}</span>
-                  </p>
+                  <p>Weight: <span>{product.weight || "N/A"}</span></p>
                   <div className="flex items-center gap-1">
                     <p>Qty:</p>
                     <select
@@ -106,27 +176,20 @@ const Cart = () => {
                         updateCartItem(product._id, Number(e.target.value))
                       }
                     >
-                      {Array.from(
-                        { length: Math.max(cartItems[product._id], 9) },
-                        (_, i) => (
-                          <option key={i} value={i + 1}>
-                            {i + 1}
-                          </option>
-                        )
-                      )}
+                      {Array.from({ length: Math.max(cartItems[product._id], 9) }, (_, i) => (
+                        <option key={i} value={i + 1}>{i + 1}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Price */}
             <p className="text-center">
               {currency}
               {product.offerPrice * product.quantity}
             </p>
 
-            {/* Remove button */}
             <button
               onClick={() => removeFromCart(product._id)}
               className="cursor-pointer mx-auto"
@@ -239,7 +302,6 @@ const Cart = () => {
         <button
           onClick={() => {
             if (paymentOption === "COD") {
-              // TODO: Add actual place order logic
               alert("Order placed with Cash on Delivery!");
             } else {
               navigate("/checkout");

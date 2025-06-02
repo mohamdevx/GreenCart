@@ -1,12 +1,26 @@
-import express  from 'express';
+import express from 'express';
 import authUser from '../middlewares/authUser.js';
-import { getAllOrders, getUserOrders, placeOrderCOD } from '../controllers/orderController.js';
 import authSeller from '../middlewares/authSeller.js';
 
-const orderRouter= express.Router();
+import {
+  placeOrderCOD,
+  placeOrderStripe,
+  getUserOrders,
+  getAllOrders,
+} from '../controllers/orderController.js'; // ✅ Import placeOrderCOD here
 
-orderRouter.post('/cod',authUser,placeOrderCOD)
-orderRouter.get('user',authUser,getUserOrders)
-orderRouter.get('/seller',authSeller,getAllOrders)
+const orderRouter = express.Router();
+
+// ✅ Place COD order
+orderRouter.post('/cod', authUser, placeOrderCOD);
+
+// ✅ Get user orders (should be POST because you're sending userId in body)
+orderRouter.post('/user', authUser, getUserOrders);
+
+// ✅ Get all orders for seller
+orderRouter.get('/seller', authSeller, getAllOrders);
+
+// ✅ Stripe order (should be POST, not GET)
+orderRouter.post('/stripe', authUser, placeOrderStripe);
 
 export default orderRouter;

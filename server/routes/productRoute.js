@@ -8,7 +8,7 @@ const productRouter = express.Router();
 // Use 'images' as the field name string
 productRouter.post('/add', upload.array('images'), authSeller, addProduct);
 productRouter.get('/list', proudctList);
-productRouter.get('/id', productById);
+productRouter.get('/:id', productById);
 productRouter.post('/stock', authSeller, changeStock);
 
 export default productRouter;
